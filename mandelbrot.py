@@ -9,11 +9,7 @@ from math import *
 import cmath
 from picture import Picture
 from colorsys import hsv_to_rgb
-# from multiprocessing import Pool, freeze_support
-
-# if __name__ == '__main__':
-#     freeze_support()
-                
+# from multiprocessing import Pool                
 
 t1 = time.time()
 it = 0
@@ -24,7 +20,6 @@ nx = int(sys.argv[2])
 ny = int(sys.argv[3])
 
 t = int(sys.argv[4])
-#sys.setrecursionlimit(max(t + 10, 1000))
 
 ox = float(sys.argv[5])
 oy = float(sys.argv[6])
@@ -41,27 +36,16 @@ def mandelbrot(c, i, j):
 
 def check(z, c, i, t):
 	global it
-	#if i <= 0:
-	#	return 0
-	#elif abs(z) > 2:
-	#	return t
-	#else:
-	#	return check((z*z) + c, c, i - 1, t + 1)
-	# cardioid/bulb
 	p = abs(z - 1/4)
 	if z.real <= p - 2*p**2 + 1/4:
 		return 0
 	if ex == 2 and (z.real+1)**2 + z.imag**2 < 1/16:
 		return 0
-	#p = zero
 	for n in range(i):
 		it += 1
 		if abs(z) > 2: # escaped
 			return t
-		#elif z == p: # loop
-		#	break
 		else:
-			#zp = cmath.polar(z)
 			z = z**ex + c
 			t += 1
 	return 0
@@ -99,7 +83,7 @@ a = [[complex(sy*(j-float(ny-1)/2)/ny+oy,sx*(-i+float(nx-1)/2)/nx+ox) for j in r
 stdio.write('...')
 
 m = [rrow(r, i) for i, r in enumerate(a)]
-#stdio.write('\r{:02.2f}%'.format(100))
+stdio.write('\r{:02.2f}%'.format(100))
 
 t2 = time.time()
 t = t2 - t1
@@ -131,16 +115,15 @@ for i in range(len(m)):
 			pic.set(j, i, color.WHITE)
 		else:
 			r, g, b = (int(255*i) for i in hsv_to_rgb(
-				((50+sqrt(50*c)) % 100) / 100,
-				.75 + .25*cos(c/(10*pi)),
+				((sqrt(70*c)) % 100) / 100,
+				.5 + .5*cos(1/(c*20*pi)),
 				# exp(((c-110)/70)**2)
-				exp(c/20-1)/(exp(c/20-1)+5)
+				exp(c/100-1)/(exp(c/100-1)+19)
 				))
-			# print(r, g, b)
 			pic.set(j, i, color.Color(r, g, b))
 	#stdio.writeln()
 
-#stdio.write('\r{:02.2f}%'.format(100))
+stdio.write('\r{:02.2f}%'.format(100))
 
 t3 = time.time()
 t = t3 - t2
@@ -157,3 +140,7 @@ stddraw.show()
 
 # python mandelbrot.py 2 400 600 300 .18 -.8 .1 .15 x.png
 # python mandelbrot.py 2 1440 2160 1000 .18 -.8 .1 .15 x.png
+# python mandelbrot.py 2 400 600 1000 .18 -.8025 .01 .015 x.png
+# python mandelbrot.py 2 800 1200 2000 .18237 -.8027 .0004 .0006 x.png
+# python mandelbrot.py 2 600 600 1200 .1823 -.8027 .00005 .00005 x.png
+# python mandelbrot.py 2 300 300 1600 .18231 -.80268 .00001 .00001 x.png
