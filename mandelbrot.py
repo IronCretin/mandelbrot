@@ -32,7 +32,7 @@ f = sys.argv[9]
 zero = 0+0j
 def mandelbrot(c, i, j):
 	# stdio.write('\r{:02.2f}%'.format(100*float(i)/ny + float(j)/(ny*nx)))
-	return check(c, c, t, 1)
+	return check(c, c, maxit, 1)
 
 def check(z, c, i, t):
 	global it
@@ -78,7 +78,13 @@ def rrow(row, i):
 #		#	m.append([-1 for i in range(len(a[i]))])
 #	return m
 # pool = Pool()
-a = [[complex(sy*(j-float(ny-1)/2)/ny+oy,sx*(-i+float(nx-1)/2)/nx+ox) for j in range(0, ny)] for i in range(0, nx)]
+a = [
+		[
+			complex(sy*(j-float(nx-1)/2)/nx+ox,sx*(-i+float(ny-1)/2)/ny+oy)
+			for j in range(0, nx)
+		]
+		for i in range(0, ny)
+	]
 
 stdio.write('...')
 
@@ -98,11 +104,11 @@ stdio.writeln(str(it) + ' iterations')
 
 
 #stddraw.show()
-pic = Picture(ny, nx)
+pic = Picture(nx, ny)
 
 for i in range(len(m)):
 	#if all(map(lambda c: not c, r)): continue
-	stdio.write('\r{:02.2f}%'.format(100*float(i)/nx))
+	stdio.write('\r{:02.2f}%'.format(100*float(i)/ny))
 	for j in range(len(m[i])):
 		c = m[i][j]
 		s = min(c*2, 255) #int(256*2*atan(c/10)/pi)
@@ -134,7 +140,7 @@ stdio.writeln()
 stdio.writeln('render:')
 stdio.writeln(f'{ts:d}s {tm:.0f}ms')
 pic.save(f)
-stddraw.setCanvasSize(ny, nx)
+stddraw.setCanvasSize(nx, ny)
 stddraw.picture(pic)
 stddraw.show()
 
