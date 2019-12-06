@@ -1,5 +1,6 @@
 # usage: python mandelbrot.py <power> <display x> < display y> <max recursion> <center x> <center y> <width x> <width y> <file name>
 
+import argparse
 import sys
 import stdio
 import stddraw
@@ -11,23 +12,50 @@ from picture import Picture
 from colorsys import hsv_to_rgb
 # from multiprocessing import Pool                
 
-t1 = time.time()
-it = 0
+parser = argparse.ArgumentParser(description='Generate Mandelbrot set images.')
+parser.add_argument('--exp', metavar='n', type=float, default=2,
+                    help='exponent for the opetation (z_i+1 = z_i^n + z_0)')
+parser.add_argument('nx', type=int,
+                    help='width of image in pixels')
+parser.add_argument('ny', type=int,
+                    help='height of image in pixels')
 
-ex = float(sys.argv[1])
+parser.add_argument('maxit', type=int,
+                    help='maximum number of iterations')
 
-nx = int(sys.argv[2])
-ny = int(sys.argv[3])
+parser.add_argument('centerx', type=float,
+                    help='x coordinate of the center of the view')
+parser.add_argument('centery', type=float,
+                    help='y coordinate of the center of the view')
 
-t = int(sys.argv[4])
+parser.add_argument('width', type=float,
+                    help='width of the view')
+parser.add_argument('height', type=float,
+                    help='height of the view')
 
-ox = float(sys.argv[5])
-oy = float(sys.argv[6])
-sx = float(sys.argv[7])
-sy = float(sys.argv[8])
+parser.add_argument('--file', '-o', type=str, default=None,
+                    help='file to save the image to')
+
+
+args = parser.parse_args()
+
+ex = args.exp
+
+nx = args.nx
+ny = args.ny
+
+t = args.maxit
+
+ox = args.centerx
+oy = args.centery
+sx = args.width
+sy = args.height
 splice = 1 #int(sys.argv[9])
 splicem = 0 #int(sys.argv[10])
-f = sys.argv[9]
+f = args.file
+
+t1 = time.time()
+it = 0
 
 zero = 0+0j
 def mandelbrot(c, i, j):
@@ -123,8 +151,7 @@ for i in range(len(m)):
 			r, g, b = (int(255*i) for i in hsv_to_rgb(
 				((sqrt(70*c)) % 100) / 100,
 				.5 + .5*cos(1/(c*20*pi)),
-				# exp(((c-110)/70)**2)
-				exp(c/100-1)/(exp(c/100-1)+19)
+				exp(c/20-1)/(exp(c/20-1)+1)
 				))
 			pic.set(j, i, color.Color(r, g, b))
 	#stdio.writeln()
@@ -139,7 +166,8 @@ tm = 1000*(t-ts)
 stdio.writeln()
 stdio.writeln('render:')
 stdio.writeln(f'{ts:d}s {tm:.0f}ms')
-pic.save(f)
+if f is not None:
+	pic.save(f)
 stddraw.setCanvasSize(nx, ny)
 stddraw.picture(pic)
 stddraw.show()
