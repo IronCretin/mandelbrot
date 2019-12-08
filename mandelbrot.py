@@ -10,11 +10,8 @@ from math import *
 import cmath
 from picture import Picture
 from colorsys import hsv_to_rgb
-from check import check
 
 parser = argparse.ArgumentParser(description='Generate Mandelbrot set images.')
-parser.add_argument('--exp', metavar='n', type=float, default=2,
-                    help='exponent for the opetation (z_i+1 = z_i^n + z_0)')
 parser.add_argument('nx', type=int,
                     help='width of image in pixels')
 parser.add_argument('ny', type=int,
@@ -35,6 +32,11 @@ parser.add_argument('height', type=float,
 
 parser.add_argument('--file', '-o', type=str, default=None,
                     help='file to save the image to')
+parser.add_argument('--exp', metavar='n', type=float, default=2,
+                    help='exponent for the operation (z_i+1 = z_i^n + z_0). Requires --pure')
+parser.add_argument('--pure',
+                    help='use pure python calculation')
+
 
 
 args = parser.parse_args()
@@ -58,10 +60,17 @@ t1 = time.time()
 it = 0
 
 zero = 0+0j
-def mandelbrot(z, i, j):
-	# stdio.write('\r{:02.2f}%'.format(100*float(i)/ny + float(j)/(ny*nx)))
-	# return check(maxit, z.real, z.imag)
-	return pycheck(maxit, z)
+
+if args.pure:
+	if exp != 2:
+		raise ValueError("Cannot use non-square exponent with c renderer")
+	from check import check
+	def mandelbrot(z):
+		return check(maxit, z.real, z.imag)
+else:
+	def mandelbrot(z):
+		# stdio.write('\r{:02.2f}%'.format(100*float(i)/ny + float(j)/(ny*nx)))
+		return pycheck(maxit, z)
 
 def pycheck(i, z):
 	z0 = z
@@ -96,7 +105,7 @@ def rrow(row, i):
 """
 def rrow(row, i):
 	stdio.write('\r{:02.2f}%'.format(100*float(i)/nx))
-	return [mandelbrot(c, i, j) for j, c in enumerate(row)]
+	return [mandelbrot(c) for j, c in enumerate(row)]
 
 #def calcbrot(spl, splm, a):
 #	m = []
