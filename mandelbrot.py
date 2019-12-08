@@ -108,7 +108,7 @@ def rrow(row, i):
 # pool = Pool()
 a = [
 		[
-			complex(sy*(j-float(nx-1)/2)/nx+ox,sx*(-i+float(ny-1)/2)/ny+oy)
+			complex(sx*(j-float(nx-1)/2)/nx+ox,sy*(-i+float(ny-1)/2)/ny+oy)
 			for j in range(0, nx)
 		]
 		for i in range(0, ny)
