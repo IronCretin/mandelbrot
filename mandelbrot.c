@@ -1,6 +1,9 @@
 #include <math.h>
 #include <stdio.h>
 
+// compile with:
+// cc -fPIC -shared -o libbrot.so mandelbrot.c
+
 double mag2(double x, double y) {
     return x*x + y*y;
 }
