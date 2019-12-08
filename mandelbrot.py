@@ -1,5 +1,3 @@
-# usage: python mandelbrot.py <power> <display x> < display y> <max recursion> <center x> <center y> <width x> <width y> <file name>
-
 import argparse
 import sys
 import stdio
@@ -11,6 +9,8 @@ import cmath
 from picture import Picture
 from colorsys import hsv_to_rgb
 
+
+# This bit just sets up the argument handling
 parser = argparse.ArgumentParser(description='Generate Mandelbrot set images.')
 parser.add_argument('nx', type=int,
                     help='width of image in pixels')
@@ -41,51 +41,78 @@ parser.add_argument('--pure',
 
 args = parser.parse_args()
 
+# exponent in the process (only works with the python calculator)
 ex = args.exp
 
+# size of the display, in pixels
 nx = args.nx
 ny = args.ny
 
+# maximum number of steps to repeat before giving up for each number
 maxit = args.maxit
 
+# region to display
 ox = args.centerx
 oy = args.centery
 sx = args.width
 sy = args.height
+
+# dunno what these do
 splice = 1 #int(sys.argv[9])
 splicem = 0 #int(sys.argv[10])
+
+# file to write to
 f = args.file
 
+# for benchmarking
 t1 = time.time()
+
+# counts number of iterations (only works for python version)
 it = 0
 
-zero = 0+0j
-
+# choose which version of the function to use, python or c
 if args.pure:
+	# use the pure python version of the function, defined below
 	def mandelbrot(z):
-		# stdio.write('\r{:02.2f}%'.format(100*float(i)/ny + float(j)/(ny*nx)))
 		return pycheck(maxit, z)
 else:
-	# if exp != 2:
-	# 	raise ValueError("Cannot use non-square exponent with c renderer")
+	# much faster c-based version
 	from check import check
 	def mandelbrot(z):
 		return check(maxit, z.real, z.imag)
 
 def pycheck(i, z):
+	"""
+	Just take a point called z in the complex plane,
+	let z1 be z squared plus z
+	and z2 is z1 squared plus z
+	and z3 is z2 squared plus z
+	and so on, if the series of z's will always stay
+	close to z and never trend away
+	that point is in the mandelbrot set
+	"""
 	z0 = z
 	global it
+	# this chunk here is an optimization to cut out some easy cases
+	# that would waste cycles, it checks if the point is in the main
+	# bulb of the set
 	p = abs(z - 1/4)
 	if z.real <= p - 2*p**2 + 1/4:
 		return 0
 	if ex == 2 and (z.real+1)**2 + z.imag**2 < 1/16:
 		return 0
+
+	# up to the max possible iterations for one point
 	for t in range(i):
 		it += 1
-		if abs(z) > 2: # escaped
+		# once the magnitude goes beyond 2, the point has escaped
+		# and is not in the set
+		if abs(z) > 2:
 			return t
 		else:
+			# iterate: z_n+1 = z_n^2 + z_0
 			z = z**ex + z0
+	# if it hasn't escaped after t steps, we assume the point is in the set
 	return -1
 
 """
@@ -104,7 +131,10 @@ def rrow(row, i):
 	return row
 """
 def rrow(row, i):
-	stdio.write('\r{:02.2f}%'.format(100*float(i)/nx))
+	"""
+	this just handles the rows. The commented line below does the progress bar
+	"""
+	# stdio.write('\r{:02.2f}%'.format(100*float(i)/nx))
 	return [mandelbrot(c) for j, c in enumerate(row)]
 
 #def calcbrot(spl, splm, a):
@@ -116,6 +146,9 @@ def rrow(row, i):
 #		#	m.append([-1 for i in range(len(a[i]))])
 #	return m
 # pool = Pool()
+
+# this bit generates the grid of numbers, i dont know how the formula
+# works and im afraid to touch it
 a = [
 		[
 			complex(sx*(j-float(nx-1)/2)/nx+ox,sy*(-i+float(ny-1)/2)/ny+oy)
@@ -126,9 +159,11 @@ a = [
 
 stdio.write('...')
 
+# process each row in the gris
 m = [rrow(r, i) for i, r in enumerate(a)]
 stdio.write('\r{:02.2f}%'.format(100))
 
+# benchmark shit
 t2 = time.time()
 t = t2 - t1
 tm = int(t/60)
@@ -144,24 +179,32 @@ stdio.writeln(str(it) + ' iterations')
 #stddraw.show()
 pic = Picture(nx, ny)
 
-for i in range(len(m)):
+for i, r in enumerate(m):
+	# generates the actual image. pizel coordinates are given by position in the array.
+	# probably some room for optimization here
+
 	#if all(map(lambda c: not c, r)): continue
-	stdio.write('\r{:02.2f}%'.format(100*float(i)/ny))
-	for j in range(len(m[i])):
-		c = m[i][j]
+	# stdio.write('\r{:02.2f}%'.format(100*float(i)/ny))
+	for j, c in enumerate(r):
 		s = min(c*2, 255) #int(256*2*atan(c/10)/pi)
+		# no idea if it still works, but this is the original text display code
+		# from before i'd figured out graphics. I should add a text mode
 		#stdio.writeln(s)
 		#stdio.write('{:2d}'.format(c))
 		#stdio.write(('*' if c == 0 else ' ') + ' ')
-		if c == -1:
+		if c == -1: # the point is in the set
 			pic.set(j, i, color.BLACK)
-		elif c == 0:
+		elif c == 0: # outside the circle of radius 2 (maybe not if i changed the algorithm)
 			pic.set(j, i, color.BLACK)
 		else:
+			# this genreates the color based on c, the number of iterations.
+			# i just strung math functions together until it spit out a path
+			# through hsv space that looked nice
 			r, g, b = (int(255*i) for i in hsv_to_rgb(
-				((-sqrt(50*c)+50) % 100) / 100,
+				((-sqrt(10*c)-90) % 100) / 100,
 				.75 + .25*cos(c*pi/20),
-				exp(c/5-1)/(exp(c/5	-1)+10)
+				# 1
+				exp(c/2-1)/(exp(c/2-1)+10)
 				))
 			pic.set(j, i, color.Color(r, g, b))
 	#stdio.writeln()
@@ -173,6 +216,7 @@ t = t3 - t2
 ts = int(t)
 tm = 1000*(t-ts)
 
+# draws the generated image to the canvas (and saves it)
 stdio.writeln()
 stdio.writeln('render:')
 stdio.writeln(f'{ts:d}s {tm:.0f}ms')
