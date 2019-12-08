@@ -10,7 +10,7 @@ from math import *
 import cmath
 from picture import Picture
 from colorsys import hsv_to_rgb
-# from multiprocessing import Pool                
+from check import check
 
 parser = argparse.ArgumentParser(description='Generate Mandelbrot set images.')
 parser.add_argument('--exp', metavar='n', type=float, default=2,
@@ -44,7 +44,7 @@ ex = args.exp
 nx = args.nx
 ny = args.ny
 
-t = args.maxit
+maxit = args.maxit
 
 ox = args.centerx
 oy = args.centery
@@ -58,25 +58,26 @@ t1 = time.time()
 it = 0
 
 zero = 0+0j
-def mandelbrot(c, i, j):
+def mandelbrot(z, i, j):
 	# stdio.write('\r{:02.2f}%'.format(100*float(i)/ny + float(j)/(ny*nx)))
-	return check(c, c, maxit, 1)
+	# return check(maxit, z.real, z.imag)
+	return pycheck(maxit, z)
 
-def check(z, c, i, t):
+def pycheck(i, z):
+	z0 = z
 	global it
 	p = abs(z - 1/4)
 	if z.real <= p - 2*p**2 + 1/4:
 		return 0
 	if ex == 2 and (z.real+1)**2 + z.imag**2 < 1/16:
 		return 0
-	for n in range(i):
+	for t in range(i):
 		it += 1
 		if abs(z) > 2: # escaped
 			return t
 		else:
-			z = z**ex + c
-			t += 1
-	return 0
+			z = z**ex + z0
+	return -1
 
 """
 def rrow(row, i):
@@ -143,15 +144,15 @@ for i in range(len(m)):
 		#stdio.writeln(s)
 		#stdio.write('{:2d}'.format(c))
 		#stdio.write(('*' if c == 0 else ' ') + ' ')
-		if c == 0:
+		if c == -1:
 			pic.set(j, i, color.BLACK)
-		elif c == -1:
-			pic.set(j, i, color.WHITE)
+		elif c == 0:
+			pic.set(j, i, color.BLACK)
 		else:
 			r, g, b = (int(255*i) for i in hsv_to_rgb(
-				((sqrt(70*c)) % 100) / 100,
-				.5 + .5*cos(1/(c*20*pi)),
-				exp(c/20-1)/(exp(c/20-1)+1)
+				((-sqrt(50*c)+50) % 100) / 100,
+				.75 + .25*cos(c*pi/20),
+				exp(c/5-1)/(exp(c/5	-1)+10)
 				))
 			pic.set(j, i, color.Color(r, g, b))
 	#stdio.writeln()
