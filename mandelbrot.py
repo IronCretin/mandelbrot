@@ -66,8 +66,8 @@ if args.pure:
 		# stdio.write('\r{:02.2f}%'.format(100*float(i)/ny + float(j)/(ny*nx)))
 		return pycheck(maxit, z)
 else:
-	if exp != 2:
-		raise ValueError("Cannot use non-square exponent with c renderer")
+	# if exp != 2:
+	# 	raise ValueError("Cannot use non-square exponent with c renderer")
 	from check import check
 	def mandelbrot(z):
 		return check(maxit, z.real, z.imag)
