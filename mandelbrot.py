@@ -130,12 +130,15 @@ def rrow(row, i):
 	#stddraw.picture(pic)
 	return row
 """
-def rrow(row, i):
+def rrow(reals, imags):
 	"""
 	this just handles the rows. The commented line below does the progress bar
 	"""
 	# stdio.write('\r{:02.2f}%'.format(100*float(i)/nx))
-	return [mandelbrot(c) for j, c in enumerate(row)]
+
+	return check(maxit, reals, imags, nx)
+
+	# return [mandelbrot(c) for j, c in enumerate(row)]
 
 #def calcbrot(spl, splm, a):
 #	m = []
@@ -149,18 +152,35 @@ def rrow(row, i):
 
 # this bit generates the grid of numbers, i dont know how the formula
 # works and im afraid to touch it
-a = [
-		[
-			complex(sx*(j-float(nx-1)/2)/nx+ox,sy*(-i+float(ny-1)/2)/ny+oy)
-			for j in range(0, nx)
+
+reals = [
+			[
+				sx*(j-float(nx-1)/2)/nx+ox
+				for j in range(0, nx)
+			]
+			for i in range(0, ny)
 		]
-		for i in range(0, ny)
-	]
+
+imags = [
+			[
+				sy*(-i+float(ny-1)/2)/ny+oy
+				for j in range(0, nx)
+			]
+			for i in range(0, ny)
+		]
+
+# a = [
+# 		[
+# 			complex(sx*(j-float(nx-1)/2)/nx+ox,sy*(-i+float(ny-1)/2)/ny+oy)
+# 			for j in range(0, nx)
+# 		]
+# 		for i in range(0, ny)
+# 	]
 
 stdio.write('...')
 
 # process each row in the gris
-m = [rrow(r, i) for i, r in enumerate(a)]
+m = [rrow(r, i) for r, i in zip(reals, imags)]
 stdio.write('\r{:02.2f}%'.format(100))
 
 # benchmark shit

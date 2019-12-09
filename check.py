@@ -1,7 +1,16 @@
-import ctypes
+from ctypes import *
 
-lib = ctypes.CDLL('libbrot.so')
+lib = CDLL('libbrot.so')
 
-check = lib.check
+ccheck = lib.check
 
-check.argtypes = (ctypes.c_int, ctypes.c_double, ctypes.c_double)
+def check(maxit, reals, imags, size):
+    ARRF = c_double * size
+    ARRI = c_int * size
+    out = ARRI()
+
+    ccheck(maxit, ARRF(*reals), ARRF(*imags), size, out)
+
+    return list(out)
+
+# check.argtypes = (ctypes.c_int, ctypes.c_double, ctypes.c_double)
