@@ -5,7 +5,7 @@
 // compile with:
 // cc -fPIC -shared -o libbrot.so mandelbrot.c
 
-const int MAXIT = 100;
+const int MAXIT = 1000;
 // const int SIZE = 30;
 
 int check(int maxit, double x0, double y0) {
@@ -35,21 +35,37 @@ int check(int maxit, double x0, double y0) {
 }
 
 int main(int argc, char *argv[]) {
-    int SIZE = atoi(argv[1]);
+    int height = atoi(argv[2]);
+    int width = atoi(argv[1]);
+    float x0 = -.5;
+    float y0 = 0;
+    float xview = 3;
+    float yview = 2;
     int steps;
     float x, y;
     // int cells[30][30];
-    printf("\033[0;31m"); 
-    for(int i = 0; i < SIZE/2; i++) {
-        y = 4.0 / (SIZE/2) * -i + 2;
-        for(int j = 0; j < SIZE; j++) {
-            x = 4.0 / (SIZE - 1) * j - 2;
+    for(int i = 0; i < height; i++) {
+        y = yview / (height - 1) * -i - y0 + yview/2;
+        for(int j = 0; j < width; j++) {
+            x = xview / (width - 1) * j + x0 - xview/2;
             // printf("%.2f + %.2fi", x, y);
             steps = check(MAXIT, x, y);
             if(steps == -1) {
                 printf("*");
             } else {
-                printf(" ");
+                printf("\033[0;3%dm", 1 + (steps / 10) % 6);
+                printf("%d", steps % 10);
+                // switch(steps/6) {
+                //     case 1:
+                //     printf(" ");
+                //     break;
+                //     case 2:
+                //     printf("`");
+                //     break;
+                //     default:
+                //     printf(".");
+                // }
+                printf("\033[0m");
             }
         }
     printf("\n");
