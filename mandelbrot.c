@@ -5,7 +5,7 @@
 // compile with:
 // cc -fPIC -shared -o libbrot.so mandelbrot.c
 
-const int MAXIT = 1000;
+// const int MAXIT = 1000;
 // const int SIZE = 30;
 
 int check(int maxit, double x0, double y0) {
@@ -35,12 +35,13 @@ int check(int maxit, double x0, double y0) {
 }
 
 int main(int argc, char *argv[]) {
-    int height = atoi(argv[2]);
     int width = atoi(argv[1]);
-    float x0 = -.5;
-    float y0 = 0;
-    float xview = 3;
-    float yview = 2;
+    int height = atoi(argv[2]);
+    float x0 = atof(argv[3]);
+    float y0 = atof(argv[4]);
+    float xview = atof(argv[5]);
+    float yview = atof(argv[6]);
+    int MAXIT = atoi(argv[7]);
     int steps;
     float x, y;
     // int cells[30][30];
@@ -51,23 +52,46 @@ int main(int argc, char *argv[]) {
             // printf("%.2f + %.2fi", x, y);
             steps = check(MAXIT, x, y);
             if(steps == -1) {
-                printf("*");
+                putchar('@');
             } else {
-                printf("\033[0;3%dm", 1 + (steps / 10) % 6);
-                printf("%d", steps % 10);
-                // switch(steps/6) {
-                //     case 1:
-                //     printf(" ");
-                //     break;
-                //     case 2:
-                //     printf("`");
-                //     break;
-                //     default:
-                //     printf(".");
-                // }
+                printf("\033[1;3%dm", 1 + (steps / 10) % 6);
+                // printf("%d", steps % 10);
+                // `.',-~^+*:
+                switch(steps % 10) {
+                    case 0:
+                        putchar('`');
+                        break;
+                    case 1:
+                        putchar('.');
+                        break;
+                    case 2:
+                        putchar('-');
+                        break;
+                    case 3:
+                        putchar('\'');
+                        break;
+                    case 4:
+                        putchar(',');
+                        break;
+                    case 5:
+                        putchar(':');
+                        break;
+                    case 6:
+                        putchar('~');
+                        break;
+                    case 7:
+                        putchar('^');
+                        break;
+                    case 8:
+                        putchar('+');
+                        break;
+                    case 9:
+                        putchar('*');
+                        break;
+                }
                 printf("\033[0m");
             }
         }
-    printf("\n");
+    putchar('\n');
     }
 }
